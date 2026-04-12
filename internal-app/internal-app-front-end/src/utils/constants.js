@@ -3,6 +3,7 @@ export const ROLES = {
   STAFF: 'STAFF',
   MANAGEMENT: 'MANAGEMENT',
   ADMIN: 'ADMIN',
+  OPERATOR: 'OPERATOR',
 };
 
 // ===== Order Statuses =====
@@ -69,7 +70,7 @@ export const NAV_ITEMS = [
     label: '',
     path: '',
     icon: '',
-    roles: [ROLES.STAFF],
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
     isDivider: true,
   },
   {
@@ -77,49 +78,49 @@ export const NAV_ITEMS = [
     label: 'My Portal',
     path: '/my-portal',
     icon: 'user',
-    roles: [ROLES.STAFF],
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
     id: 'payment-reminder',
     label: 'Payment Reminder',
     path: '/payment-reminder',
     icon: 'dollar',
-    roles: [ROLES.STAFF],
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
     id: 'my-tasks',
     label: 'My Tasks',
     path: '/my-tasks',
     icon: 'clipboard',
-    roles: [ROLES.STAFF],
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
     id: 'leave-application',
     label: 'Leave Application',
     path: '/leave-application',
     icon: 'calendar',
-    roles: [ROLES.STAFF],
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
     id: 'stock-checking',
     label: 'Stock Checking',
     path: '/stock-checking',
     icon: 'package',
-    roles: [ROLES.STAFF],
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
-    id: 'raise-request',
-    label: 'Raise Request',
-    path: '/raise-request',
+    id: 'request-creation',
+    label: 'Request',
+    path: '/request-creation',
     icon: 'send',
-    roles: [ROLES.STAFF],
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
     id: 'divider-staff-end',
     label: '',
     path: '',
     icon: '',
-    roles: [ROLES.STAFF],
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
     isDivider: true,
   },
   {
@@ -158,19 +159,41 @@ export const NAV_ITEMS = [
     roles: [ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
+    id: 'divider-delivery',
+    label: '',
+    path: '',
+    icon: '',
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN, ROLES.OPERATOR],
+    isDivider: true,
+  },
+  {
+    id: 'delivery-update',
+    label: 'Delivery Update',
+    path: '/delivery-update',
+    icon: 'truck',
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN, ROLES.OPERATOR],
+  },
+  {
+    id: 'my-delivery-tasks',
+    label: 'My Deliveries',
+    path: '/my-delivery-tasks',
+    icon: 'package',
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN, ROLES.OPERATOR],
+  },
+  {
+    id: 'delivery-manager',
+    label: 'Delivery Manager',
+    path: '/delivery-manager',
+    icon: 'users',
+    roles: [ROLES.MANAGEMENT, ROLES.ADMIN],
+  },
+  {
     id: 'divider-1',
     label: '',
     path: '',
     icon: '',
     roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
     isDivider: true,
-  },
-  {
-    id: 'request-raiser',
-    label: 'Raise Request',
-    path: '/request-raiser',
-    icon: 'request',
-    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
     id: 'requests',
@@ -315,3 +338,45 @@ export const MISMATCH_ISSUE_CONFIG = {
   EXPIRY: { label: 'Expiry Date Issue', color: 'danger' },
   OTHER: { label: 'Other Issue', color: 'info' },
 };
+
+// ===== Delivery Statuses =====
+export const DELIVERY_STATUSES = {
+  READY_FOR_DISPATCH: 'READY_FOR_DISPATCH',
+  ASSIGNED: 'ASSIGNED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DELIVERED: 'DELIVERED',
+};
+
+export const DELIVERY_STATUS_CONFIG = {
+  READY_FOR_DISPATCH: { label: 'Ready for Dispatch', color: 'yellow', bgClass: 'bg-yellow-100', textClass: 'text-yellow-700', borderClass: 'border-yellow-300', dotClass: 'bg-yellow-400' },
+  ASSIGNED: { label: 'Assigned', color: 'purple', bgClass: 'bg-purple-100', textClass: 'text-purple-700', borderClass: 'border-purple-300', dotClass: 'bg-purple-400' },
+  IN_PROGRESS: { label: 'In Progress', color: 'blue', bgClass: 'bg-blue-100', textClass: 'text-blue-700', borderClass: 'border-blue-300', dotClass: 'bg-blue-400' },
+  DELIVERED: { label: 'Delivered', color: 'green', bgClass: 'bg-green-100', textClass: 'text-green-700', borderClass: 'border-green-300', dotClass: 'bg-green-400' },
+};
+
+// ===== Delivery Personnel Availability =====
+export const DELIVERY_AVAILABILITY = {
+  AVAILABLE: 'AVAILABLE',
+  ON_LEAVE: 'ON_LEAVE',
+  ON_DELIVERY: 'ON_DELIVERY',
+};
+
+export const DELIVERY_AVAILABILITY_CONFIG = {
+  AVAILABLE: { label: 'Available', color: 'green', bgClass: 'bg-green-100', textClass: 'text-green-700', dotClass: 'bg-green-500' },
+  ON_LEAVE: { label: 'On Leave', color: 'red', bgClass: 'bg-red-100', textClass: 'text-red-700', dotClass: 'bg-red-500' },
+  ON_DELIVERY: { label: 'On Delivery', color: 'blue', bgClass: 'bg-blue-100', textClass: 'text-blue-700', dotClass: 'bg-blue-500' },
+};
+
+// ===== Areas for Delivery Mapping =====
+export const DELIVERY_AREAS = [
+  'Gaddam Plot',
+  'Ranpise Nagar',
+  'Old City',
+  'Cotton Market',
+  'Tilak Road',
+  'Station Road',
+  'Civil Lines',
+  'Akola Fort',
+  'Murtizapur Road',
+  'Balapur Naka',
+];

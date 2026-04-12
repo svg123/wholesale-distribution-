@@ -10,8 +10,14 @@ import {
   FiChevronDown,
   FiBell,
 } from 'react-icons/fi';
+import NavigationControls from '../common/NavigationControls';
 
-export default function Header() {
+export default function Header({
+  canGoBack = false,
+  canGoForward = false,
+  onNavigateBack,
+  onNavigateForward,
+}) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
@@ -35,8 +41,15 @@ export default function Header() {
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-30">
-      {/* Left - Page context */}
-      <div>
+      {/* Left - Navigation + Page context */}
+      <div className="flex items-center gap-3">
+        <NavigationControls
+          canGoBack={canGoBack}
+          canGoForward={canGoForward}
+          onBack={onNavigateBack}
+          onForward={onNavigateForward}
+        />
+        <div className="h-5 w-px bg-gray-200" />
         <h2 className="text-lg font-semibold text-gray-900">Central Command</h2>
       </div>
 

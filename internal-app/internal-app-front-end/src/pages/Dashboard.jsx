@@ -2,14 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStatsStart, fetchStatsSuccess, fetchStatsFailure } from '../redux/slices/dashboardSlice';
-import StatCard from '../components/common/StatCard';
+
 import { PageLoader } from '../components/common/LoadingSpinner';
 import OrderPipeline from '../components/dashboard/OrderPipeline';
 import OrderTimerRow from '../components/dashboard/OrderTimerRow';
 import VoiceSearchInput from '../components/common/VoiceSearchInput';
-import { formatCurrency, formatNumber, getUrgencyLevel } from '../utils/formatters';
-import { ROLES } from '../utils/constants';
-import { FiFileText, FiArrowRight, FiAlertCircle, FiSearch, FiUser, FiDollarSign, FiCheckSquare, FiCalendar, FiPackage, FiSend } from 'react-icons/fi';
+import { formatCurrency, getUrgencyLevel } from '../utils/formatters';
+
+import { FiFileText, FiArrowRight, FiAlertCircle, FiSearch, FiUser, FiDollarSign, FiCheckSquare, FiCalendar, FiPackage, FiSend, FiTruck } from 'react-icons/fi';
 
 // Helper to create relative timestamps for mock data
 const hoursAgo = (h) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
@@ -48,15 +48,51 @@ const mockStats = {
   ],
 };
 
+const formatNumber = (num) => new Intl.NumberFormat('en-IN').format(num);
+
+function StatCard({ title, value, subtitle, icon, color }) {
+  const colorMap = {
+    blue: { bg: 'bg-blue-50', icon: 'text-blue-600', ring: 'ring-blue-100' },
+    yellow: { bg: 'bg-yellow-50', icon: 'text-yellow-600', ring: 'ring-yellow-100' },
+    purple: { bg: 'bg-purple-50', icon: 'text-purple-600', ring: 'ring-purple-100' },
+    green: { bg: 'bg-green-50', icon: 'text-green-600', ring: 'ring-green-100' },
+  };
+  const iconMap = {
+    orders: <FiFileText className="w-5 h-5" />,
+    pending: <FiAlertCircle className="w-5 h-5" />,
+    dispatched: <FiSend className="w-5 h-5" />,
+    revenue: <FiDollarSign className="w-5 h-5" />,
+  };
+  const c = colorMap[color] || colorMap.blue;
+
+  return (
+    <div className="card">
+      <div className="card-body">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500">{title}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+          </div>
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${c.bg} ${c.icon} ring-1 ${c.ring}`}>
+            {iconMap[icon] || iconMap.orders}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { stats, recentOrders, isLoading } = useSelector((state) => state.dashboard);
   const { user } = useSelector((state) => state.auth);
+  const isStaff = user?.role === 'STAFF';
   const [pipelineFilter, setPipelineFilter] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const isStaff = user?.role === ROLES.STAFF;
+
 
   useEffect(() => {
     const loadStats = async () => {
@@ -113,11 +149,11 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {isStaff ? 'Welcome back, ' + (user?.name || 'Staff') : 'Real-time overview of order operations'}
+            Welcome back, {user?.name || 'User'}
           </p>
         </div>
-        {/* Urgency summary badges — Admin/Manager only */}
-        {!isStaff && (
+        
+        
           <div className="flex items-center gap-3">
             {delayedCount > 0 && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 animate-pulse">
@@ -132,14 +168,14 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
-        )}
+        
       </div>
 
       {/* ===== STAFF DASHBOARD ===== */}
       {isStaff && (
         <>
-          {/* Staff Quick Actions — 6 Module Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {/* Staff Quick Actions — 7 Module Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
             <div
               className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
               onClick={() => navigate('/my-portal')}
@@ -178,6 +214,20 @@ export default function DashboardPage() {
                 </div>
                 <h3 className="text-sm font-semibold text-gray-900 mt-3">My Tasks</h3>
                 <p className="text-xs text-gray-500 mt-0.5">Assigned by manager</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
+
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/my-delivery-tasks')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-cyan-200 transition-colors">
+                  <FiTruck className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">My Deliveries</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Delivery assignments</p>
                 <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
               </div>
             </div>
@@ -225,46 +275,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Staff Today's Quick Summary */}
-          <div className="card">
-            <div className="card-body">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900">Today's Quick Summary</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">Your assigned sub-station activity</p>
-                </div>
-                <div className="px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full">
-                  ● On Duty
-                </div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-blue-600 font-medium">Orders Today</p>
-                  <p className="text-xl font-bold text-blue-900">{stats.todayOrders}</p>
-                </div>
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-xs text-amber-600 font-medium">Pending</p>
-                  <p className="text-xl font-bold text-amber-900">{stats.todayOrders - stats.todayDispatched}</p>
-                </div>
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-green-600 font-medium">Dispatched</p>
-                  <p className="text-xl font-bold text-green-900">{stats.todayDispatched}</p>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <p className="text-xs text-purple-600 font-medium">Revenue</p>
-                  <p className="text-xl font-bold text-purple-900">{formatCurrency(stats.todayRevenue)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </>
       )}
 
-      {/* ===== ADMIN/MANAGER DASHBOARD ===== */}
+      {/* ===== ADMIN/MANAGER Stat Cards ===== */}
       {!isStaff && (
-        <>
-
-      {/* Today's Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Today's Orders"
@@ -295,6 +310,7 @@ export default function DashboardPage() {
           color="green"
         />
       </div>
+      )}
 
       {/* Bill Generation CTA Banner */}
       <div
@@ -320,6 +336,36 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-2 text-primary-600 group-hover:text-primary-700">
               <span className="text-sm font-medium">Go to Bills</span>
+              <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Delivery Update CTA Banner */}
+      <div
+        className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+        onClick={() => navigate('/delivery-update')}
+      >
+        <div className="card-body">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                <FiTruck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">Delivery Update</h3>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  <span className="inline-flex items-center gap-1">
+                    <FiTruck className="w-3.5 h-3.5 text-blue-500" />
+                    <span className="font-medium text-blue-600">Central tracking system</span>
+                  </span>
+                  {' '}for all delivery tasks
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-blue-600 group-hover:text-blue-700">
+              <span className="text-sm font-medium">View Deliveries</span>
               <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -451,8 +497,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-        </>
-      )}
     </div>
   );
 }

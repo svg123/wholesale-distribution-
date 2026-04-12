@@ -1,14 +1,23 @@
+
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import useNavigationHistory from '../../hooks/useNavigationHistory';
 
 export default function Layout() {
+  const { canGoBack, canGoForward, goBack, goForward } = useNavigationHistory();
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
-        <Header />
+        <Header
+          canGoBack={canGoBack}
+          canGoForward={canGoForward}
+          onNavigateBack={goBack}
+          onNavigateForward={goForward}
+        />
         <main className="flex-1 p-6">
           <Outlet />
         </main>

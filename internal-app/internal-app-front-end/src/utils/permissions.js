@@ -32,6 +32,7 @@ export function getRoleLabel(role) {
     [ROLES.STAFF]: 'Staff',
     [ROLES.MANAGEMENT]: 'Management',
     [ROLES.ADMIN]: 'Administrator',
+    [ROLES.OPERATOR]: 'Operator',
   };
   return labels[role] || role;
 }
@@ -44,6 +45,7 @@ export function getRoleBadgeColor(role) {
     [ROLES.STAFF]: 'badge-info',
     [ROLES.MANAGEMENT]: 'badge-warning',
     [ROLES.ADMIN]: 'badge-success',
+    [ROLES.OPERATOR]: 'badge-info',
   };
   return colors[role] || 'badge-gray';
 }
@@ -132,4 +134,25 @@ export function hasUtilityAccess(user, utilityUsers) {
  */
 export function canManageUtilityAccess(userRole) {
   return [ROLES.ADMIN, ROLES.MANAGEMENT].includes(userRole);
+}
+
+/**
+ * Check if user can manage Delivery Manager settings (Admin/Manager only)
+ */
+export function canManageDeliverySettings(userRole) {
+  return [ROLES.ADMIN, ROLES.MANAGEMENT].includes(userRole);
+}
+
+/**
+ * Check if user can assign/reassign delivery tasks (Admin/Manager/Operator)
+ */
+export function canAssignDeliveryTasks(userRole) {
+  return [ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.OPERATOR].includes(userRole);
+}
+
+/**
+ * Check if user can view Delivery Update Dashboard (all roles)
+ */
+export function canViewDeliveryDashboard(userRole) {
+  return [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN, ROLES.OPERATOR].includes(userRole);
 }

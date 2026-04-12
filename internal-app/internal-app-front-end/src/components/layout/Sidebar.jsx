@@ -27,6 +27,7 @@ import {
   FiCalendar,
   FiPackage,
   FiSend,
+  FiTruck,
 } from 'react-icons/fi';
 
 const iconMap = {
@@ -49,6 +50,7 @@ const iconMap = {
   calendar: FiCalendar,
   package: FiPackage,
   send: FiSend,
+  truck: FiTruck,
 };
 
 export default function Sidebar() {

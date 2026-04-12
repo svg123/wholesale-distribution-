@@ -6,6 +6,7 @@ import substationReducer from './slices/substationSlice';
 import requestReducer from './slices/requestSlice';
 import uiReducer from './slices/uiSlice';
 import utilityReducer from './slices/utilitySlice';
+import deliveryReducer from './slices/deliverySlice';
 
 const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ const store = configureStore({
     request: requestReducer,
     ui: uiReducer,
     utility: utilityReducer,
+    delivery: deliveryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

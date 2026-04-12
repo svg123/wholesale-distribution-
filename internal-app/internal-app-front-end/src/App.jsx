@@ -18,6 +18,9 @@ import SubStationDetailPage from './pages/SubStationDetail';
 import SubStationManagementPage from './pages/SubStationManagement';
 import RequestManagementPage from './pages/RequestManagement';
 import RequestRaiserPage from './pages/RequestRaiser';
+import RequestCreationPage from './pages/RequestCreation';
+import BillDashboardPage from './pages/BillDashboard';
+import FinalBillPage from './pages/FinalBill';
 import UserManagementPage from './pages/UserManagement';
 import AnalyticsPage from './pages/Analytics';
 import AuditLogsPage from './pages/AuditLogs';
@@ -41,6 +44,11 @@ import MyTask from './pages/staff/MyTask';
 import LeaveApplication from './pages/staff/LeaveApplication';
 import StockChecking from './pages/staff/StockChecking';
 import RaiseRequest from './pages/staff/RaiseRequest';
+
+// Delivery Module Pages
+import DeliveryUpdate from './pages/DeliveryUpdate';
+import MyDeliveryTasks from './pages/MyDeliveryTasks';
+import DeliveryManager from './pages/DeliveryManager';
 
 // Common
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -76,6 +84,9 @@ function App() {
             <Route path="/substation-management" element={<ProtectedRoute requiredRoles={['MANAGEMENT', 'ADMIN']}><SubStationManagementPage /></ProtectedRoute>} />
             <Route path="/requests" element={<RequestManagementPage />} />
             <Route path="/request-raiser" element={<RequestRaiserPage />} />
+            <Route path="/request-creation" element={<RequestCreationPage />} />
+            <Route path="/bill-dashboard" element={<BillDashboardPage />} />
+            <Route path="/final-bill" element={<FinalBillPage />} />
 
             {/* Management+ Routes */}
             <Route
@@ -138,6 +149,26 @@ function App() {
               path="/system-config"
               element={
                 <ProtectedRoute requiredRoles={['ADMIN']}><SystemConfigPage /></ProtectedRoute>
+              }
+            />
+
+            {/* Delivery Module Routes - Accessible to all roles except ADMIN-only pages */}
+            <Route
+              path="/delivery-update"
+              element={
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN', 'OPERATOR']}><DeliveryUpdate /></ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-delivery-tasks"
+              element={
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN', 'OPERATOR']}><MyDeliveryTasks /></ProtectedRoute>
+              }
+            />
+            <Route
+              path="/delivery-manager"
+              element={
+                <ProtectedRoute requiredRoles={['MANAGEMENT', 'ADMIN']}><DeliveryManager /></ProtectedRoute>
               }
             />
 
