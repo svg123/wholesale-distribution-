@@ -29,6 +29,8 @@ import {
   FiSend,
   FiTruck,
   FiEye,
+  FiCreditCard,
+  FiSliders,
 } from 'react-icons/fi';
 
 const iconMap = {
@@ -53,6 +55,8 @@ const iconMap = {
   send: FiSend,
   truck: FiTruck,
   eye: FiEye,
+  'credit-note': FiCreditCard,
+  'credit-config': FiSliders,
 };
 
 export default function Sidebar() {

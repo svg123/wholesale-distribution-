@@ -98,6 +98,11 @@ export default function DashboardPage() {
               className="btn-secondary w-full">
               View Profile
             </button>
+            <button 
+              onClick={() => navigate('/credit-notes')}
+              className="btn-secondary w-full">
+              📋 Credit Notes
+            </button>
           </div>
         </div>
 

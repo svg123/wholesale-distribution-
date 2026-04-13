@@ -53,6 +53,10 @@ import DeliveryManager from './pages/DeliveryManager';
 // Staff Track Page
 import StaffTrackPage from './pages/StaffTrack';
 
+// Credit Note Module Pages
+import CreditNoteManagement from './pages/CreditNoteManagement';
+import CreditNoteConfigPage from './pages/CreditNoteConfigPage';
+
 // Common
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -180,6 +184,20 @@ function App() {
               path="/staff-track"
               element={
                 <ProtectedRoute requiredRoles={['MANAGEMENT', 'ADMIN']}><StaffTrackPage /></ProtectedRoute>
+              }
+            />
+
+            {/* Credit Note Module Routes */}
+            <Route
+              path="/credit-notes"
+              element={
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN', 'OPERATOR']}><CreditNoteManagement /></ProtectedRoute>
+              }
+            />
+            <Route
+              path="/credit-note-config"
+              element={
+                <ProtectedRoute requiredRoles={['ADMIN', 'MANAGEMENT']}><CreditNoteConfigPage /></ProtectedRoute>
               }
             />
 

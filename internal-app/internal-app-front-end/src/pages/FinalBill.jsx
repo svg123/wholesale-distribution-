@@ -19,6 +19,7 @@ import {
   FiCopy,
 } from 'react-icons/fi';
 import billService from '../services/billService';
+import CreditNoteBillIntegration from '../components/credit-note/CreditNoteBillIntegration';
 
 // ── Helpers ──────────────────────────────────────────────────────
 const formatCurrency = (amount) =>
@@ -68,6 +69,7 @@ export default function FinalBill() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [appliedCredits, setAppliedCredits] = useState([]);
 
   // Clear location state after reading
   useEffect(() => {
@@ -230,6 +232,15 @@ export default function FinalBill() {
               )}
             </div>
           </div>
+
+          {/* Credit Note Integration */}
+          <CreditNoteBillIntegration
+            customerId={passedState.customerCode || passedState.customer}
+            billAmount={passedState.estimatedAmount || 0}
+            appliedCredits={appliedCredits}
+            onApplyCredit={setAppliedCredits}
+            onRemoveCredit={(cnId) => setAppliedCredits((prev) => prev.filter((c) => c.creditNoteId !== cnId))}
+          />
 
           {/* Error */}
           {error && (
@@ -452,6 +463,17 @@ export default function FinalBill() {
                       </span>
                       <span className="font-medium text-green-600">
                         -{formatCurrency(bill.discountAmount)}
+                      </span>
+                    </div>
+                  )}
+
+                  {appliedCredits.length > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-blue-600">
+                        Credit Note Adjustment
+                      </span>
+                      <span className="font-medium text-blue-600">
+                        -{formatCurrency(appliedCredits.reduce((s, c) => s + c.amountUsed, 0))}
                       </span>
                     </div>
                   )}

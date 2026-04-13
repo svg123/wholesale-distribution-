@@ -5,6 +5,7 @@ import productReducer from './slices/productSlice';
 import uiReducer from './slices/uiSlice';
 import orderPlacementReducer from './slices/orderPlacementSlice';
 import communicationReducer from './slices/communicationSlice';
+import creditNoteReducer from './slices/creditNoteSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     ui: uiReducer,
     orderPlacement: orderPlacementReducer,
     communication: communicationReducer,
+    creditNote: creditNoteReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -260,6 +260,28 @@ export const NAV_ITEMS = [
     icon: 'utility',
     roles: [ROLES.ADMIN, ROLES.MANAGEMENT],
   },
+  {
+    id: 'divider-credit-note',
+    label: '',
+    path: '',
+    icon: '',
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN, ROLES.OPERATOR],
+    isDivider: true,
+  },
+  {
+    id: 'credit-notes',
+    label: 'Credit Notes',
+    path: '/credit-notes',
+    icon: 'credit-note',
+    roles: [ROLES.STAFF, ROLES.MANAGEMENT, ROLES.ADMIN, ROLES.OPERATOR],
+  },
+  {
+    id: 'credit-note-config',
+    label: 'CN Configuration',
+    path: '/credit-note-config',
+    icon: 'credit-config',
+    roles: [ROLES.ADMIN, ROLES.MANAGEMENT],
+  },
 ];
 
 // ===== Sub-Stations (organized by Pharma Company) =====

@@ -14,6 +14,8 @@ import OutstandingPage from './pages/Outstanding';
 import OffersPage from './pages/Offers';
 import OrderPlacementPage from './pages/OrderPlacement';
 import CommunicationPage from './pages/Communication';
+import CreditNotesPage from './pages/CreditNotes';
+import CreateCreditNotePage from './pages/CreateCreditNote';
 import NotFoundPage from './pages/NotFound';
 
 function App() {
@@ -36,6 +38,9 @@ function App() {
         <Route path="/offers" element={<OffersPage />} />
         <Route path="/order-placement" element={<OrderPlacementPage />} />
         <Route path="/communication" element={<CommunicationPage />} />
+        <Route path="/credit-notes" element={<CreditNotesPage />} />
+        <Route path="/credit-notes/new" element={<CreateCreditNotePage />} />
+        <Route path="/credit-notes/:id/edit" element={<CreateCreditNotePage />} />
         <Route path="/" element={<DashboardPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
