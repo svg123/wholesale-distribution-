@@ -188,6 +188,13 @@ export const NAV_ITEMS = [
     roles: [ROLES.MANAGEMENT, ROLES.ADMIN],
   },
   {
+    id: 'staff-track',
+    label: 'Staff Track',
+    path: '/staff-track',
+    icon: 'eye',
+    roles: [ROLES.MANAGEMENT, ROLES.ADMIN],
+  },
+  {
     id: 'divider-1',
     label: '',
     path: '',

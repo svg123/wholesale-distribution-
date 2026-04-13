@@ -7,6 +7,7 @@ import requestReducer from './slices/requestSlice';
 import uiReducer from './slices/uiSlice';
 import utilityReducer from './slices/utilitySlice';
 import deliveryReducer from './slices/deliverySlice';
+import staffTrackReducer from './slices/staffTrackSlice';
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     ui: uiReducer,
     utility: utilityReducer,
     delivery: deliveryReducer,
+    staffTrack: staffTrackReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

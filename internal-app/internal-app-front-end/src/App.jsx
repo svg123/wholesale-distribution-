@@ -50,6 +50,9 @@ import DeliveryUpdate from './pages/DeliveryUpdate';
 import MyDeliveryTasks from './pages/MyDeliveryTasks';
 import DeliveryManager from './pages/DeliveryManager';
 
+// Staff Track Page
+import StaffTrackPage from './pages/StaffTrack';
+
 // Common
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -100,37 +103,37 @@ function App() {
             <Route
               path="/my-portal"
               element={
-                <ProtectedRoute requiredRoles={['STAFF']}><MyPortal /></ProtectedRoute>
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN']}><MyPortal /></ProtectedRoute>
               }
             />
             <Route
               path="/payment-reminder"
               element={
-                <ProtectedRoute requiredRoles={['STAFF']}><PaymentReminder /></ProtectedRoute>
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN']}><PaymentReminder /></ProtectedRoute>
               }
             />
             <Route
               path="/my-tasks"
               element={
-                <ProtectedRoute requiredRoles={['STAFF']}><MyTask /></ProtectedRoute>
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN']}><MyTask /></ProtectedRoute>
               }
             />
             <Route
               path="/leave-application"
               element={
-                <ProtectedRoute requiredRoles={['STAFF']}><LeaveApplication /></ProtectedRoute>
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN']}><LeaveApplication /></ProtectedRoute>
               }
             />
             <Route
               path="/stock-checking"
               element={
-                <ProtectedRoute requiredRoles={['STAFF']}><StockChecking /></ProtectedRoute>
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN']}><StockChecking /></ProtectedRoute>
               }
             />
             <Route
               path="/raise-request"
               element={
-                <ProtectedRoute requiredRoles={['STAFF']}><RaiseRequest /></ProtectedRoute>
+                <ProtectedRoute requiredRoles={['STAFF', 'MANAGEMENT', 'ADMIN']}><RaiseRequest /></ProtectedRoute>
               }
             />
             <Route
@@ -169,6 +172,14 @@ function App() {
               path="/delivery-manager"
               element={
                 <ProtectedRoute requiredRoles={['MANAGEMENT', 'ADMIN']}><DeliveryManager /></ProtectedRoute>
+              }
+            />
+
+            {/* Staff Track Route */}
+            <Route
+              path="/staff-track"
+              element={
+                <ProtectedRoute requiredRoles={['MANAGEMENT', 'ADMIN']}><StaffTrackPage /></ProtectedRoute>
               }
             />
 

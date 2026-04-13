@@ -28,6 +28,7 @@ import {
   FiPackage,
   FiSend,
   FiTruck,
+  FiEye,
 } from 'react-icons/fi';
 
 const iconMap = {
@@ -51,6 +52,7 @@ const iconMap = {
   package: FiPackage,
   send: FiSend,
   truck: FiTruck,
+  eye: FiEye,
 };
 
 export default function Sidebar() {

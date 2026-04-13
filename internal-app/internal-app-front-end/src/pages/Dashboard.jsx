@@ -9,7 +9,7 @@ import OrderTimerRow from '../components/dashboard/OrderTimerRow';
 import VoiceSearchInput from '../components/common/VoiceSearchInput';
 import { formatCurrency, getUrgencyLevel } from '../utils/formatters';
 
-import { FiFileText, FiArrowRight, FiAlertCircle, FiSearch, FiUser, FiDollarSign, FiCheckSquare, FiCalendar, FiPackage, FiSend, FiTruck } from 'react-icons/fi';
+import { FiFileText, FiArrowRight, FiAlertCircle, FiSearch, FiUser, FiDollarSign, FiCheckSquare, FiCalendar, FiPackage, FiSend, FiTruck, FiEye } from 'react-icons/fi';
 
 // Helper to create relative timestamps for mock data
 const hoursAgo = (h) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
@@ -262,7 +262,7 @@ export default function DashboardPage() {
 
             <div
               className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
-              onClick={() => navigate('/raise-request')}
+              onClick={() => navigate('/request-creation')}
             >
               <div className="card-body text-center py-6">
                 <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-teal-200 transition-colors">
@@ -278,95 +278,182 @@ export default function DashboardPage() {
         </>
       )}
 
-      {/* ===== ADMIN/MANAGER Stat Cards ===== */}
+      {/* ===== ADMIN/MANAGER Dashboard — Module Cards ===== */}
       {!isStaff && (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Today's Orders"
-          value={formatNumber(stats.todayOrders)}
-          subtitle="Placed today"
-          icon="orders"
-          color="blue"
-        />
-        <StatCard
-          title="Pending"
-          value={formatNumber(stats.todayOrders - stats.todayDispatched)}
-          subtitle="Awaiting processing"
-          icon="pending"
-          color="yellow"
-        />
-        <StatCard
-          title="Dispatched"
-          value={formatNumber(stats.todayDispatched)}
-          subtitle="Completed today"
-          icon="dispatched"
-          color="purple"
-        />
-        <StatCard
-          title="Today's Revenue"
-          value={formatCurrency(stats.todayRevenue)}
-          subtitle="Collected today"
-          icon="revenue"
-          color="green"
-        />
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/my-portal')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-blue-200 transition-colors">
+                  <FiUser className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">My Portal</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Personal info & salary</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
+
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/payment-reminder')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-red-200 transition-colors">
+                  <FiDollarSign className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">Payments</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Bills & reminders</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
+
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/my-tasks')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-amber-200 transition-colors">
+                  <FiCheckSquare className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">My Tasks</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Assigned by manager</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
+
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/my-delivery-tasks')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-cyan-200 transition-colors">
+                  <FiTruck className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">My Deliveries</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Delivery assignments</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
+
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/leave-application')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-green-200 transition-colors">
+                  <FiCalendar className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">Leave</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Apply & track leave</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
+
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/stock-checking')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-purple-200 transition-colors">
+                  <FiPackage className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">Stock Check</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Daily tally & audit</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
+
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/request-creation')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-teal-200 transition-colors">
+                  <FiSend className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">Raise Request</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Staff-to-staff tickets</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
+
+            {/* Staff Track — Admin/Manager only */}
+            <div
+              className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+              onClick={() => navigate('/staff-track')}
+            >
+              <div className="card-body text-center py-6">
+                <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mx-auto group-hover:bg-indigo-200 transition-colors">
+                  <FiEye className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mt-3">Staff Track</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Workforce monitoring</p>
+                <FiArrowRight className="w-4 h-4 text-gray-400 mx-auto mt-2 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            </div>
       </div>
       )}
 
-      {/* Bill Generation CTA Banner */}
-      <div
-        className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
-        onClick={() => navigate('/bill-dashboard')}
-      >
-        <div className="card-body">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                <FiFileText className="w-6 h-6" />
+      {/* Bill Generation & Delivery Update — Side by Side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Bill Generation CTA Banner */}
+        <div
+          className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+          onClick={() => navigate('/bill-dashboard')}
+        >
+          <div className="card-body">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                  <FiFileText className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Bill Generation</h3>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    <span className="inline-flex items-center gap-1">
+                      <FiAlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                      <span className="font-medium text-amber-600">4 orders</span>
+                    </span>
+                    {' '}are ready for final bill generation
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">Bill Generation</h3>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  <span className="inline-flex items-center gap-1">
-                    <FiAlertCircle className="w-3.5 h-3.5 text-amber-500" />
-                    <span className="font-medium text-amber-600">4 orders</span>
-                  </span>
-                  {' '}are ready for final bill generation
-                </p>
+              <div className="flex items-center gap-2 text-primary-600 group-hover:text-primary-700">
+                <span className="text-sm font-medium">Go to Bills</span>
+                <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
-            <div className="flex items-center gap-2 text-primary-600 group-hover:text-primary-700">
-              <span className="text-sm font-medium">Go to Bills</span>
-              <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Delivery Update CTA Banner */}
-      <div
-        className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
-        onClick={() => navigate('/delivery-update')}
-      >
-        <div className="card-body">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <FiTruck className="w-6 h-6" />
+        {/* Delivery Update CTA Banner */}
+        <div
+          className="card cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all group"
+          onClick={() => navigate('/delivery-update')}
+        >
+          <div className="card-body">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <FiTruck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Delivery Update</h3>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    <span className="inline-flex items-center gap-1">
+                      <FiTruck className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="font-medium text-blue-600">Central tracking system</span>
+                    </span>
+                    {' '}for all delivery tasks
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">Delivery Update</h3>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  <span className="inline-flex items-center gap-1">
-                    <FiTruck className="w-3.5 h-3.5 text-blue-500" />
-                    <span className="font-medium text-blue-600">Central tracking system</span>
-                  </span>
-                  {' '}for all delivery tasks
-                </p>
+              <div className="flex items-center gap-2 text-blue-600 group-hover:text-blue-700">
+                <span className="text-sm font-medium">View Deliveries</span>
+                <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
-            <div className="flex items-center gap-2 text-blue-600 group-hover:text-blue-700">
-              <span className="text-sm font-medium">View Deliveries</span>
-              <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
         </div>
