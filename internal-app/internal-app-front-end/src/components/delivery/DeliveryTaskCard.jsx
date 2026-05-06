@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { FiX, FiUser, FiMapPin, FiTruck, FiPhone } from 'react-icons/fi';
+import { FiX, FiUser, FiMapPin, FiTruck, FiPhone, FiRefreshCw } from 'react-icons/fi';
 import DeliveryStatusBadge from './DeliveryStatusBadge';
 import { DELIVERY_STATUSES, DELIVERY_AVAILABILITY } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
-import { formatDeliveryTime } from '../../services/deliveryService';
+import { formatDeliveryTime, getOTPTaskStatus, OTP_CONFIG } from '../../services/deliveryService';
 
-const DeliveryTaskCard = ({ task, onAssign, onStatusUpdate, onViewDetails, compact = false }) => {
+const DeliveryTaskCard = ({ task, onAssign, onStatusUpdate, onViewDetails, onVerifyOTP, onRegenerateOTP, compact = false }) => {
+  const [otpStatus, setOtpStatus] = useState(null);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [regenerateMsg, setRegenerateMsg] = useState('');
   const { user } = useSelector((state) => state.auth);
   const [showActions, setShowActions] = useState(false);
 
@@ -47,6 +50,32 @@ const DeliveryTaskCard = ({ task, onAssign, onStatusUpdate, onViewDetails, compa
   };
 
   const priority = priorityConfig[task.priority] || priorityConfig.MEDIUM;
+
+  // Fetch OTP status for IN_PROGRESS tasks
+  useEffect(() => {
+    if (task.status === DELIVERY_STATUSES.IN_PROGRESS) {
+      const status = getOTPTaskStatus(task.id);
+      setOtpStatus(status);
+    }
+  }, [task.id, task.status]);
+
+  const handleRegenerate = async () => {
+    if (!onRegenerateOTP) return;
+    setIsRegenerating(true);
+    setRegenerateMsg('');
+    try {
+      await onRegenerateOTP(task.id);
+      const newStatus = getOTPTaskStatus(task.id);
+      setOtpStatus(newStatus);
+      setRegenerateMsg('OTP regenerated successfully!');
+      setTimeout(() => setRegenerateMsg(''), 3000);
+    } catch (err) {
+      setRegenerateMsg(err.message);
+      setTimeout(() => setRegenerateMsg(''), 3000);
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
 
   return (
     <div className="card hover:shadow-md transition-all">
@@ -105,6 +134,45 @@ const DeliveryTaskCard = ({ task, onAssign, onStatusUpdate, onViewDetails, compa
           </div>
         )}
 
+        {/* OTP Status Indicator for IN_PROGRESS tasks */}
+        {task.status === DELIVERY_STATUSES.IN_PROGRESS && otpStatus && (
+          <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-lg text-xs font-medium ${
+            otpStatus.isActive
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : otpStatus.isUsed
+              ? 'bg-gray-50 text-gray-500 border border-gray-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}>
+            {otpStatus.isActive ? (
+              <>
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                OTP Active - Ready for verification
+              </>
+            ) : otpStatus.isUsed ? (
+              <>
+                <span>✅</span>
+                OTP Used - Delivery completed
+              </>
+            ) : (
+              <>
+                <span>⏰</span>
+                OTP Expired - Regenerate to continue
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Regenerate Message */}
+        {regenerateMsg && (
+          <div className={`mb-3 px-3 py-2 rounded-lg text-xs font-medium ${
+            regenerateMsg.includes('success')
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}>
+            {regenerateMsg.includes('success') ? '✅' : '❌'} {regenerateMsg}
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
           {canAssign && !task.assignedTo && task.status === DELIVERY_STATUSES.READY_FOR_DISPATCH && (
@@ -117,12 +185,43 @@ const DeliveryTaskCard = ({ task, onAssign, onStatusUpdate, onViewDetails, compa
           )}
 
           {canUpdateStatus && task.assignedTo && getNextStatus(task.status) && (
-            <button
-              onClick={() => onStatusUpdate && onStatusUpdate(task, getNextStatus(task.status))}
-              className="btn btn-primary text-xs py-1.5 px-3"
-            >
-              {getNextStatusLabel(task.status)}
-            </button>
+            task.status === DELIVERY_STATUSES.IN_PROGRESS ? (
+              <>
+                <button
+                  onClick={() => onVerifyOTP && onVerifyOTP(task)}
+                  className="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1"
+                >
+                  🔐 Verify OTP
+                </button>
+                {onRegenerateOTP && otpStatus && !otpStatus.isActive && !otpStatus.isUsed && (
+                  <button
+                    onClick={handleRegenerate}
+                    disabled={isRegenerating}
+                    className="btn btn-outline text-xs py-1.5 px-3 flex items-center gap-1 text-amber-600 border-amber-300 hover:bg-amber-50 disabled:opacity-50"
+                  >
+                    <FiRefreshCw className={`w-3 h-3 ${isRegenerating ? 'animate-spin' : ''}`} />
+                    {isRegenerating ? 'Generating...' : 'Regenerate OTP'}
+                  </button>
+                )}
+                {onRegenerateOTP && otpStatus && otpStatus.isActive && (
+                  <button
+                    onClick={handleRegenerate}
+                    disabled={isRegenerating}
+                    className="btn btn-ghost text-xs py-1.5 px-3 flex items-center gap-1 text-gray-500 hover:text-gray-700"
+                  >
+                    <FiRefreshCw className={`w-3 h-3 ${isRegenerating ? 'animate-spin' : ''}`} />
+                    {isRegenerating ? 'Generating...' : 'Regenerate'}
+                  </button>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={() => onStatusUpdate && onStatusUpdate(task, getNextStatus(task.status))}
+                className="btn btn-primary text-xs py-1.5 px-3"
+              >
+                {getNextStatusLabel(task.status)}
+              </button>
+            )
           )}
 
           {task.assignedTo && canAssign && task.status !== DELIVERY_STATUSES.DELIVERED && (

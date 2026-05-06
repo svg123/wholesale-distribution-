@@ -428,3 +428,132 @@ export function formatDeliveryTime(isoString) {
   if (diffHours < 24) return `${diffHours}h ago`;
   return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
+
+// ===== OTP Configuration =====
+export const OTP_CONFIG = {
+  MAX_REGENERATION_COUNT: 3,
+  OTP_VALIDITY_MINUTES: 10,
+  OTP_LENGTH: 6,
+};
+
+// ===== In-memory OTP Store (mock) =====
+// Maps taskId → { otp, generatedAt, expiresAt, regenerationCount, isUsed }
+const otpStore = new Map();
+
+// Generate a random 6-digit OTP
+function generateOTP() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+/**
+ * Generate OTP for a delivery task.
+ * Called when status changes to IN_PROGRESS (Out for Delivery) or DISPATCHED.
+ * 
+ * @param {string} taskId - Delivery task ID
+ * @returns {{ otp: string, expiresAt: string, regenerationCount: number }}
+ */
+export function generateTaskOTP(taskId) {
+  const existing = otpStore.get(taskId);
+
+  if (existing && existing.regenerationCount >= OTP_CONFIG.MAX_REGENERATION_COUNT) {
+    throw new Error(`Maximum OTP regeneration limit (${OTP_CONFIG.MAX_REGENERATION_COUNT}) reached.`);
+  }
+
+  const otp = generateOTP();
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + OTP_CONFIG.OTP_VALIDITY_MINUTES * 60 * 1000);
+
+  otpStore.set(taskId, {
+    otp,
+    generatedAt: now.toISOString(),
+    expiresAt: expiresAt.toISOString(),
+    regenerationCount: existing ? existing.regenerationCount + 1 : 0,
+    isUsed: false,
+  });
+
+  return {
+    otp,
+    expiresAt: expiresAt.toISOString(),
+    regenerationCount: existing ? existing.regenerationCount + 1 : 0,
+    maxRegenerations: OTP_CONFIG.MAX_REGENERATION_COUNT,
+  };
+}
+
+/**
+ * Verify OTP for a delivery task.
+ * Called by the delivery agent when completing delivery.
+ * 
+ * @param {string} taskId - Delivery task ID
+ * @param {string} inputOTP - OTP entered by agent
+ * @returns {{ success: boolean, message: string }}
+ */
+export function verifyTaskOTP(taskId, inputOTP) {
+  const record = otpStore.get(taskId);
+
+  if (!record) {
+    throw new Error('No OTP found for this delivery. Please generate one first.');
+  }
+
+  if (record.isUsed) {
+    throw new Error('This OTP has already been used. Delivery cannot be verified twice.');
+  }
+
+  const now = new Date();
+  const expiresAt = new Date(record.expiresAt);
+
+  if (now > expiresAt) {
+    throw new Error('OTP has expired. Please regenerate and try again.');
+  }
+
+  if (record.otp !== inputOTP) {
+    throw new Error('Invalid OTP. Please check and try again.');
+  }
+
+  // Mark OTP as used
+  record.isUsed = true;
+
+  return {
+    success: true,
+    message: 'OTP verified successfully. Delivery marked as complete.',
+    verifiedAt: now.toISOString(),
+  };
+}
+
+/**
+ * Regenerate OTP for a delivery task.
+ * Invalidates old OTP and creates a new one.
+ * 
+ * @param {string} taskId - Delivery task ID
+ * @returns {{ otp: string, expiresAt: string, regenerationCount: number }}
+ */
+export function regenerateTaskOTP(taskId) {
+  return generateTaskOTP(taskId);
+}
+
+/**
+ * Get current OTP status for a task (for internal app display).
+ * Does NOT return the OTP value itself (for security).
+ * 
+ * @param {string} taskId
+ * @returns {{ isActive: boolean, isExpired: boolean, expiresAt: string, regenerationCount: number, maxRegenerations: number }}
+ */
+export function getOTPTaskStatus(taskId) {
+  const record = otpStore.get(taskId);
+
+  if (!record) {
+    return { isActive: false, isExpired: false, regenerationCount: 0, maxRegenerations: OTP_CONFIG.MAX_REGENERATION_COUNT };
+  }
+
+  const now = new Date();
+  const expiresAt = new Date(record.expiresAt);
+
+  return {
+    isActive: !record.isUsed && now <= expiresAt,
+    isExpired: now > expiresAt,
+    isUsed: record.isUsed,
+    expiresAt: record.expiresAt,
+    generatedAt: record.generatedAt,
+    regenerationCount: record.regenerationCount,
+    maxRegenerations: OTP_CONFIG.MAX_REGENERATION_COUNT,
+  };
+}

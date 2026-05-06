@@ -18,11 +18,16 @@ import DeliveryTaskCard from '../components/delivery/DeliveryTaskCard';
 import DeliveryStatusBadge from '../components/delivery/DeliveryStatusBadge';
 import AssignmentModal from '../components/delivery/AssignmentModal';
 import VoiceSearchInput from '../components/common/VoiceSearchInput';
+import OTPVerificationModal from '../components/delivery/OTPVerificationModal';
 import {
   mockDeliveryTasks,
   mockDeliveryPersonnel,
   mockAreaMappings,
   autoAssignDeliveryTask,
+  generateTaskOTP,
+  verifyTaskOTP,
+  regenerateTaskOTP,
+  getOTPTaskStatus,
 } from '../services/deliveryService';
 import { DELIVERY_STATUSES, DELIVERY_STATUS_CONFIG } from '../utils/constants';
 import { formatCurrency } from '../utils/formatters';
@@ -49,6 +54,7 @@ const DeliveryUpdateDashboard = () => {
   const [viewMode, setViewMode] = useState('card'); // card or table
   const [assigningTask, setAssigningTask] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [otpTask, setOtpTask] = useState(null);
 
   // Initialize mock data
   useEffect(() => {
@@ -142,6 +148,45 @@ const DeliveryUpdateDashboard = () => {
       taskId: task.id,
       status: newStatus,
     }));
+    // Auto-generate OTP when moving to IN_PROGRESS (Out for Delivery)
+    if (newStatus === DELIVERY_STATUSES.IN_PROGRESS) {
+      try {
+        generateTaskOTP(task.id);
+      } catch (e) {
+        console.warn('OTP generation warning:', e.message);
+      }
+    }
+  };
+
+  // Handle OTP verification for delivery completion
+  const handleVerifyOTP = (task) => {
+    setOtpTask(task);
+  };
+
+  const handleOTPVerified = async (taskId, otpValue) => {
+    // Verify the OTP
+    const result = verifyTaskOTP(taskId, otpValue);
+    if (result.success) {
+      // Mark delivery as complete
+      dispatch(updateDeliveryTaskStatus({
+        taskId: taskId,
+        status: DELIVERY_STATUSES.DELIVERED,
+      }));
+    }
+  };
+
+  // Handle OTP regeneration for delivery agent
+  const handleRegenerateOTP = (taskId) => {
+    try {
+      const result = regenerateTaskOTP(taskId);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const handleOTPModalClose = (success) => {
+    setOtpTask(null);
   };
 
   const handleViewDetails = (task) => {
@@ -340,6 +385,8 @@ const DeliveryUpdateDashboard = () => {
               onAssign={canAssign ? handleAssign : undefined}
               onStatusUpdate={handleStatusUpdate}
               onViewDetails={handleViewDetails}
+              onVerifyOTP={handleVerifyOTP}
+              onRegenerateOTP={handleRegenerateOTP}
             />
           ))}
         </div>
@@ -457,6 +504,15 @@ const DeliveryUpdateDashboard = () => {
         />
       )}
 
+      {/* OTP Verification Modal */}
+      {otpTask && (
+        <OTPVerificationModal
+          delivery={otpTask}
+          onVerify={handleOTPVerified}
+          onClose={handleOTPModalClose}
+        />
+      )}
+
       {/* Task Detail Modal */}
       {selectedTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -531,6 +587,68 @@ const DeliveryUpdateDashboard = () => {
                   📝 {selectedTask.notes}
                 </div>
               )}
+              {/* OTP Status in Detail Modal */}
+              {selectedTask.status === DELIVERY_STATUSES.IN_PROGRESS && (() => {
+                const otpStatus = getOTPTaskStatus(selectedTask.id);
+                if (!otpStatus) return null;
+                return (
+                  <div className={`p-3 rounded-lg border ${
+                    otpStatus.isActive
+                      ? 'bg-green-50 border-green-200'
+                      : otpStatus.isUsed
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'bg-red-50 border-red-200'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-semibold flex items-center gap-1.5">
+                        🔐 OTP Status
+                      </p>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        otpStatus.isActive
+                          ? 'bg-green-200 text-green-800'
+                          : otpStatus.isUsed
+                          ? 'bg-blue-200 text-blue-800'
+                          : 'bg-red-200 text-red-800'
+                      }`}>
+                        {otpStatus.isActive ? 'Active' : otpStatus.isUsed ? 'Used' : 'Expired'}
+                      </span>
+                    </div>
+                    {otpStatus.isActive && (
+                      <p className="text-xs text-gray-600">
+                        OTP generated at {new Date(otpStatus.generatedAt).toLocaleTimeString('en-IN')}
+                        {' · '}Regenerations: {otpStatus.regenerationCount}/{otpStatus.maxRegenerations}
+                      </p>
+                    )}
+                    {otpStatus.isUsed && (
+                      <p className="text-xs text-gray-600">
+                        OTP verified and delivery confirmed at {new Date(otpStatus.usedAt).toLocaleTimeString('en-IN')}
+                      </p>
+                    )}
+                    {!otpStatus.isActive && !otpStatus.isUsed && (
+                      <div className="mt-2">
+                        <p className="text-xs text-red-600 mb-2">OTP has expired. Generate a new one.</p>
+                        {otpStatus.regenerationCount < otpStatus.maxRegenerations ? (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await regenerateTaskOTP(selectedTask.id);
+                                setSelectedTask({ ...selectedTask }); // trigger re-render
+                              } catch (err) {
+                                alert(err.message);
+                              }
+                            }}
+                            className="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg transition"
+                          >
+                            🔄 Regenerate OTP
+                          </button>
+                        ) : (
+                          <p className="text-xs text-gray-500">Max regeneration limit reached.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

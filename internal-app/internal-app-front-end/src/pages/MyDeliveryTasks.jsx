@@ -12,10 +12,16 @@ import {
 } from '../redux/slices/deliverySlice';
 import DeliveryStatusBadge from '../components/delivery/DeliveryStatusBadge';
 import VoiceSearchInput from '../components/common/VoiceSearchInput';
+import OTPVerificationModal from '../components/delivery/OTPVerificationModal';
 import {
   mockDeliveryTasks,
   mockDeliveryPersonnel,
   mockAreaMappings,
+  generateTaskOTP,
+  verifyTaskOTP,
+  regenerateTaskOTP,
+  getOTPTaskStatus,
+  OTP_CONFIG,
 } from '../services/deliveryService';
 import { DELIVERY_STATUSES } from '../utils/constants';
 import { formatCurrency } from '../utils/formatters';
@@ -31,6 +37,8 @@ const MyDeliveryTasks = () => {
   const [activeTab, setActiveTab] = useState(DELIVERY_STATUSES.ASSIGNED);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
+  const [otpTask, setOtpTask] = useState(null);
+  const [otpRefreshKey, setOtpRefreshKey] = useState(0);
 
   // Initialize mock data
   useEffect(() => {
@@ -100,10 +108,47 @@ const MyDeliveryTasks = () => {
       taskId: task.id,
       status: newStatus,
     }));
+    // Auto-generate OTP when starting delivery (moving to IN_PROGRESS)
+    if (newStatus === DELIVERY_STATUSES.IN_PROGRESS) {
+      try {
+        generateTaskOTP(task.id);
+      } catch (e) {
+        console.warn('OTP generation warning:', e.message);
+      }
+    }
   };
 
   const handleViewDetails = (task) => {
     setSelectedTask(task);
+  };
+
+  // OTP verification handlers
+  const handleVerifyOTP = (task) => {
+    setOtpTask(task);
+  };
+
+  const handleOTPVerified = async (taskId, otpValue) => {
+    const result = verifyTaskOTP(taskId, otpValue);
+    if (result.success) {
+      dispatch(updateDeliveryTaskStatus({
+        taskId: taskId,
+        status: DELIVERY_STATUSES.DELIVERED,
+      }));
+    }
+  };
+
+  const handleOTPModalClose = () => {
+    setOtpTask(null);
+  };
+
+  // Handle OTP regeneration for delivery agent
+  const handleRegenerateOTP = (taskId) => {
+    try {
+      const result = regenerateTaskOTP(taskId);
+      return result;
+    } catch (err) {
+      throw err;
+    }
   };
 
   // Tabs
@@ -265,6 +310,11 @@ const MyDeliveryTasks = () => {
             };
             const priority = priorityConfig[task.priority] || priorityConfig.MEDIUM;
 
+            // Get OTP status for this task
+            const otpStatus = task.status === DELIVERY_STATUSES.IN_PROGRESS
+              ? getOTPTaskStatus(task.id)
+              : null;
+
             return (
               <div key={task.id} className="card hover:shadow-md transition-all">
                 <div className="card-body p-4">
@@ -319,6 +369,28 @@ const MyDeliveryTasks = () => {
                         </div>
                       )}
 
+                      {/* OTP Status Indicator for IN_PROGRESS tasks */}
+                      {task.status === DELIVERY_STATUSES.IN_PROGRESS && otpStatus && (
+                        <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-lg text-xs font-medium ${
+                          otpStatus.isActive
+                            ? 'bg-green-50 text-green-700 border border-green-200'
+                            : otpStatus.isUsed
+                            ? 'bg-gray-50 text-gray-500 border border-gray-200'
+                            : 'bg-red-50 text-red-700 border border-red-200'
+                        }`}>
+                          {otpStatus.isActive ? (
+                            <>
+                              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                              OTP Active - Ask customer for OTP to verify delivery
+                            </>
+                          ) : otpStatus.isUsed ? (
+                            <>✅ OTP Used - Delivery completed</>
+                          ) : (
+                            <>⏰ OTP Expired - Regenerate to continue delivery</>
+                          )}
+                        </div>
+                      )}
+
                       {/* Actions */}
                       <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                         {task.status === DELIVERY_STATUSES.ASSIGNED && (
@@ -332,11 +404,25 @@ const MyDeliveryTasks = () => {
                         )}
                         {task.status === DELIVERY_STATUSES.IN_PROGRESS && (
                           <button
-                            onClick={() => handleStatusUpdate(task, DELIVERY_STATUSES.DELIVERED)}
+                            onClick={() => handleVerifyOTP(task)}
                             className="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
                           >
-                            <FiCheck className="w-3.5 h-3.5" />
-                            Mark Delivered
+                            🔐 Verify OTP & Deliver
+                          </button>
+                        )}
+                        {task.status === DELIVERY_STATUSES.IN_PROGRESS && otpStatus && !otpStatus.isActive && !otpStatus.isUsed && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await handleRegenerateOTP(task.id);
+                                setOtpRefreshKey(prev => prev + 1);
+                              } catch (err) {
+                                alert(err.message);
+                              }
+                            }}
+                            className="btn btn-outline text-xs py-1.5 px-3 flex items-center gap-1.5 text-amber-600 border-amber-300 hover:bg-amber-50"
+                          >
+                            🔄 Regenerate OTP
                           </button>
                         )}
                         <button
@@ -353,6 +439,15 @@ const MyDeliveryTasks = () => {
             );
           })}
         </div>
+      )}
+
+      {/* OTP Verification Modal */}
+      {otpTask && (
+        <OTPVerificationModal
+          delivery={otpTask}
+          onVerify={handleOTPVerified}
+          onClose={handleOTPModalClose}
+        />
       )}
 
       {/* Task Detail Modal */}
@@ -425,6 +520,68 @@ const MyDeliveryTasks = () => {
                   📝 {selectedTask.notes}
                 </div>
               )}
+              {/* OTP Status in Detail Modal */}
+              {selectedTask.status === DELIVERY_STATUSES.IN_PROGRESS && (() => {
+                const otpStatus = getOTPTaskStatus(selectedTask.id);
+                if (!otpStatus) return null;
+                return (
+                  <div className={`p-3 rounded-lg border ${
+                    otpStatus.isActive
+                      ? 'bg-green-50 border-green-200'
+                      : otpStatus.isUsed
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'bg-red-50 border-red-200'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-semibold flex items-center gap-1.5">
+                        🔐 OTP Status
+                      </p>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        otpStatus.isActive
+                          ? 'bg-green-200 text-green-800'
+                          : otpStatus.isUsed
+                          ? 'bg-blue-200 text-blue-800'
+                          : 'bg-red-200 text-red-800'
+                      }`}>
+                        {otpStatus.isActive ? 'Active' : otpStatus.isUsed ? 'Used' : 'Expired'}
+                      </span>
+                    </div>
+                    {otpStatus.isActive && (
+                      <p className="text-xs text-gray-600">
+                        OTP generated at {new Date(otpStatus.generatedAt).toLocaleTimeString('en-IN')}
+                        {' · '}Regenerations: {otpStatus.regenerationCount}/{otpStatus.maxRegenerations}
+                      </p>
+                    )}
+                    {otpStatus.isUsed && (
+                      <p className="text-xs text-gray-600">
+                        OTP verified and delivery confirmed at {new Date(otpStatus.usedAt).toLocaleTimeString('en-IN')}
+                      </p>
+                    )}
+                    {!otpStatus.isActive && !otpStatus.isUsed && (
+                      <div className="mt-2">
+                        <p className="text-xs text-red-600 mb-2">OTP has expired. Generate a new one.</p>
+                        {otpStatus.regenerationCount < otpStatus.maxRegenerations ? (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await regenerateTaskOTP(selectedTask.id);
+                                setOtpRefreshKey(prev => prev + 1);
+                              } catch (err) {
+                                alert(err.message);
+                              }
+                            }}
+                            className="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg transition"
+                          >
+                            🔄 Regenerate OTP
+                          </button>
+                        ) : (
+                          <p className="text-xs text-gray-500">Max regeneration limit reached.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

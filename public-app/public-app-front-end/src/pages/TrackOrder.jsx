@@ -5,6 +5,7 @@ import OrderSelector from '../components/TrackOrder/OrderSelector';
 import OrderTimeline from '../components/TrackOrder/OrderTimeline';
 import DeliveryInfo from '../components/TrackOrder/DeliveryInfo';
 import TrackingMap from '../components/TrackOrder/TrackingMap';
+import BottomNavBar from '../components/common/BottomNavBar';
 
 /**
  * TrackOrder Page
@@ -165,6 +166,7 @@ const TrackOrder = () => {
           </div>
         )}
       </div>
+      <BottomNavBar />
     </div>
   );
 };

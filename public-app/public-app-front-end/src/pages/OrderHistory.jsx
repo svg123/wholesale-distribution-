@@ -11,6 +11,7 @@ import {
 import OrderHistoryTable from '../components/OrderHistory/OrderHistoryTable';
 import OrderFilters from '../components/OrderHistory/OrderFilters';
 import OrderStats from '../components/OrderHistory/OrderStats';
+import BottomNavBar from '../components/common/BottomNavBar';
 
 export default function OrderHistoryPage() {
   const dispatch = useDispatch();
@@ -209,6 +210,7 @@ export default function OrderHistoryPage() {
           />
         </div>
       </main>
+      <BottomNavBar />
     </div>
   );
 }

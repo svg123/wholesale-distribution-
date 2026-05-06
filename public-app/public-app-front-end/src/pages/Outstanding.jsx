@@ -5,6 +5,7 @@ import OutstandingBalance from '../components/Outstanding/OutstandingBalance';
 import OutstandingList from '../components/Outstanding/OutstandingList';
 import OutstandingSummary from '../components/Outstanding/OutstandingSummary';
 import PaymentHistory from '../components/Outstanding/PaymentHistory';
+import BottomNavBar from '../components/common/BottomNavBar';
 
 export default function OutstandingPage() {
   const navigate = useNavigate();
@@ -251,6 +252,7 @@ export default function OutstandingPage() {
           </div>
         )}
       </main>
+      <BottomNavBar />
     </div>
   );
 }

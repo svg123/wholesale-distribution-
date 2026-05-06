@@ -237,3 +237,16 @@ html {
 .animate-banner-fade-in {
   animation: banner-fade-in 0.4s ease-out;
 }
+
+/* ============================================
+   Bottom Navigation Bar
+   ============================================ */
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Hide scrollbar on bottom nav if needed */
+nav::-webkit-scrollbar {
+  display: none;
+}

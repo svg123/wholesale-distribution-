@@ -16,6 +16,7 @@ import OrderPlacementPage from './pages/OrderPlacement';
 import CommunicationPage from './pages/Communication';
 import CreditNotesPage from './pages/CreditNotes';
 import CreateCreditNotePage from './pages/CreateCreditNote';
+import DeliveryDashboardPage from './pages/DeliveryDashboard';
 import NotFoundPage from './pages/NotFound';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         <Route path="/credit-notes" element={<CreditNotesPage />} />
         <Route path="/credit-notes/new" element={<CreateCreditNotePage />} />
         <Route path="/credit-notes/:id/edit" element={<CreateCreditNotePage />} />
+        <Route path="/delivery-dashboard" element={<DeliveryDashboardPage />} />
         <Route path="/" element={<DashboardPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
